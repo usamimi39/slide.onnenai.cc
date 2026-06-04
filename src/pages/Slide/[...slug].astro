@@ -1,0 +1,48 @@
+---
+import { type CollectionEntry, getCollection } from 'astro:content';
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import Header from '../../components/Header.astro';
+import SlideViewer from '../../components/SlideViewer';
+import { SITE_TITLE } from '../../consts';
+
+export async function getStaticPaths() {
+	const slides = await getCollection('slide');
+	return slides.map((slide) => ({
+		params: { slug: slide.id },
+		props: slide,
+	}));
+}
+type Props = CollectionEntry<'slide'>;
+
+const slide = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`${slide.data.title} | ${SITE_TITLE}`} description={slide.data.description ?? ''} />
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h3>{slide.data.title}</h3>
+			<p><FormattedDate date={slide.data.pubDate} /></p>
+			{slide.data.description && <p>{slide.data.description}</p>}
+			<SlideViewer pdfFile={slide.data.pdfFile} client:only="react" />
+		</main>
+		<Footer />
+	</body>
+</html>
+<style>
+	h3 {
+		font-size: 1.8em;
+	}
+
+	@media (max-width: 720px) {
+		h3 {
+			font-size: 1.5em;
+		}
+	}
+</style>
